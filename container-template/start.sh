@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e  # Exit the script if any statement returns a non-true return value
+set -e # Exit the script if any statement returns a non-true return value
 
 # ---------------------------------------------------------------------------- #
 #                          Function Definitions                                #
@@ -26,10 +26,10 @@ setup_ssh() {
     if [[ $PUBLIC_KEY ]]; then
         echo "Setting up SSH..."
         mkdir -p ~/.ssh
-        echo "$PUBLIC_KEY" >> ~/.ssh/authorized_keys
+        echo "$PUBLIC_KEY" >>~/.ssh/authorized_keys
         chmod 700 -R ~/.ssh
 
-         if [ ! -f /etc/ssh/ssh_host_rsa_key ]; then
+        if [ ! -f /etc/ssh/ssh_host_rsa_key ]; then
             ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -q -N ''
             echo "RSA key fingerprint:"
             ssh-keygen -lf /etc/ssh/ssh_host_rsa_key.pub
@@ -63,20 +63,28 @@ setup_ssh() {
     fi
 }
 
+setup_hip() {
+    rm -rf /workspace/HIP-Subnet &&
+        git clone https://github.com/HIP-Labs/HIP-Subnet /workspace/HIP-Subnet &&
+        cd /workspace/HIP-Subnet &&
+        git checkout main &&
+        pip install -r requirements.txt &&
+        pip install -e .
+}
 # Export env vars
 export_env_vars() {
     echo "Exporting environment variables..."
-    printenv | grep -E '^RUNPOD_|^PATH=|^_=' | awk -F = '{ print "export " $1 "=\"" $2 "\"" }' >> /etc/rp_environment
-    echo 'source /etc/rp_environment' >> ~/.bashrc
+    printenv | grep -E '^RUNPOD_|^PATH=|^_=' | awk -F = '{ print "export " $1 "=\"" $2 "\"" }' >>/etc/rp_environment
+    echo 'source /etc/rp_environment' >>~/.bashrc
 }
 
 # Start jupyter lab
 start_jupyter() {
     if [[ $JUPYTER_PASSWORD ]]; then
         echo "Starting Jupyter Lab..."
-        mkdir -p /workspace && \
-        cd / && \
-        nohup jupyter lab --allow-root --no-browser --port=8888 --ip=* --FileContentsManager.delete_to_trash=False --ServerApp.terminado_settings='{"shell_command":["/bin/bash"]}' --ServerApp.token=$JUPYTER_PASSWORD --ServerApp.allow_origin=* --ServerApp.preferred_dir=/workspace &> /jupyter.log &
+        mkdir -p /workspace &&
+            cd / &&
+            nohup jupyter lab --allow-root --no-browser --port=8888 --ip=* --FileContentsManager.delete_to_trash=False --ServerApp.terminado_settings='{"shell_command":["/bin/bash"]}' --ServerApp.token=$JUPYTER_PASSWORD --ServerApp.allow_origin=* --ServerApp.preferred_dir=/workspace &>/jupyter.log &
         echo "Jupyter Lab started"
     fi
 }
@@ -94,6 +102,7 @@ echo "Pod Started"
 setup_ssh
 start_jupyter
 export_env_vars
+setup_hip
 
 execute_script "/post_start.sh" "Running post-start script..."
 

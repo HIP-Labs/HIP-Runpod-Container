@@ -62,6 +62,8 @@ WORKDIR /root
 
 COPY .bashrc /.bashrc
 COPY welcome.txt /welcome.txt
+# append the .bashrc to the root .bashrc
+RUN cat /.bashrc >> /root/.bashrc && rm /.bashrc
 
 # NGINX Proxy
 COPY --from=proxy nginx.conf /etc/nginx/nginx.conf
