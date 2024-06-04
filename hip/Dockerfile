@@ -72,8 +72,9 @@ COPY README.md /usr/share/nginx/html/README.md
 
 # Start Scripts
 COPY pre_start.sh /pre_start.sh
+COPY post_start.sh /post_start.sh
 COPY --from=scripts start.sh /
-RUN chmod +x /start.sh && chmod +x /pre_start.sh
+RUN chmod +x /start.sh && chmod +x /pre_start.sh && chmod +x /post_start.sh
 
 SHELL ["/bin/bash", "--login", "-c"]
 CMD [ "/start.sh" ]
