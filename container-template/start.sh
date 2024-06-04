@@ -23,10 +23,10 @@ execute_script() {
 
 # Setup ssh
 setup_ssh() {
-    if [[ $PUBLIC_KEY ]]; then
+    if [[ $RUNPOD_SSH_PUBLIC_KEY ]]; then
         echo "Setting up SSH..."
         mkdir -p ~/.ssh
-        echo "$PUBLIC_KEY" >>~/.ssh/authorized_keys
+        echo "$RUNPOD_SSH_PUBLIC_KEY" >>~/.ssh/authorized_keys
         chmod 700 -R ~/.ssh
 
         if [ ! -f /etc/ssh/ssh_host_rsa_key ]; then
@@ -68,6 +68,7 @@ setup_hip() {
         git clone https://github.com/HIP-Labs/HIP-Subnet /workspace/HIP-Subnet &&
         cd /workspace/HIP-Subnet &&
         git checkout main &&
+        git pull &&
         pip install -r requirements.txt &&
         pip install -e .
 }
